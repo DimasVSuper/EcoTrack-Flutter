@@ -6,27 +6,45 @@ import '../models/transport_type.dart';
 class TransportProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
 
+  // ── Logs ───────────────────────────────────────────────────
   List<TransportLog> _logs = [];
   List<TransportLog> get logs => _logs;
-
-  List<TransportType> _types = [];
-  List<TransportType> get types => _types;
 
   double get totalEmission => _logs.fold(0, (sum, log) => sum + log.emissionKg);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // ── Transport Types ────────────────────────────────────────
+  List<TransportType> _types = [];
+  List<TransportType> get types => _types;
+
+  bool _typesLoading = false;
+  bool get typesLoading => _typesLoading;
+
+  String? _typesError;
+  String? get typesError => _typesError;
+
+  // ── Methods ────────────────────────────────────────────────
+
   Future<void> fetchTypes() async {
+    _typesLoading = true;
+    _typesError = null;
+    notifyListeners();
+
     try {
       final response = await _apiClient.dio.get('/transport-types');
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'];
         _types = data.map((e) => TransportType.fromJson(e)).toList();
-        notifyListeners();
+      } else {
+        _typesError = 'Gagal memuat kendaraan (${response.statusCode})';
       }
-    } catch (_) {
-      // Keep types as is on failure
+    } catch (e) {
+      _typesError = 'Koneksi gagal. Pastikan server backend berjalan.';
+    } finally {
+      _typesLoading = false;
+      notifyListeners();
     }
   }
 
@@ -41,11 +59,11 @@ class TransportProvider with ChangeNotifier {
         _logs = data.map((e) => TransportLog.fromJson(e)).toList();
       }
     } catch (_) {
-      // Handle error or keep log list as is
+      // keep existing logs on failure
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<bool> addLog({
@@ -67,11 +85,12 @@ class TransportProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // fetchLogs resets _isLoading via finally block
         await fetchLogs();
         return true;
       }
     } catch (_) {
-      // Fail silently for MVP
+      // fall through
     }
 
     _isLoading = false;

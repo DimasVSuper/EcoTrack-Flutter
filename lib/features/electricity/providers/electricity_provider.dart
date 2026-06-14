@@ -13,8 +13,12 @@ class ElectricityProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  String? _error;
+  String? get error => _error;
+
   Future<void> fetchLogs() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
@@ -24,11 +28,11 @@ class ElectricityProvider with ChangeNotifier {
         _logs = data.map((e) => ElectricityLog.fromJson(e)).toList();
       }
     } catch (_) {
-      // Keep logs as is on failure
+      // keep existing logs on failure
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<bool> addLog({
@@ -37,6 +41,7 @@ class ElectricityProvider with ChangeNotifier {
     required String loggingDate,
   }) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
@@ -50,11 +55,14 @@ class ElectricityProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // fetchLogs handles resetting _isLoading via finally block
         await fetchLogs();
         return true;
+      } else {
+        _error = 'Gagal menyimpan (${response.statusCode})';
       }
-    } catch (_) {
-      // Fail silently for MVP
+    } catch (e) {
+      _error = 'Koneksi gagal. Pastikan server backend berjalan.';
     }
 
     _isLoading = false;

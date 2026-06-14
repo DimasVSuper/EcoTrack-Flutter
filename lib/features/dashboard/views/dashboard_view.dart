@@ -9,6 +9,7 @@ import '../../transport/views/transport_input_view.dart';
 import '../../transport/views/transport_history_view.dart';
 import '../../electricity/views/electricity_input_view.dart';
 import '../../electricity/views/electricity_history_view.dart';
+import '../widgets/tree_equivalency_card.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -17,14 +18,33 @@ class DashboardView extends StatefulWidget {
   State<DashboardView> createState() => _DashboardViewState();
 }
 
-class _DashboardViewState extends State<DashboardView> {
+class _DashboardViewState extends State<DashboardView> with WidgetsBindingObserver {
+  void _loadDashboardData() {
+    Provider.of<TransportProvider>(context, listen: false).fetchLogs();
+    Provider.of<ElectricityProvider>(context, listen: false).fetchLogs();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TransportProvider>(context, listen: false).fetchLogs();
-      Provider.of<ElectricityProvider>(context, listen: false).fetchLogs();
+      if (!mounted) return;
+      _loadDashboardData();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadDashboardData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -50,9 +70,7 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         ],
       ),
-      body: transportProvider.isLoading || electricityProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,6 +150,8 @@ class _DashboardViewState extends State<DashboardView> {
     return Column(
       children: [
         _buildSummaryCard(context, 'Total Emisi', '${totalOverall.toStringAsFixed(1)} kg', Icons.cloud, Colors.orange),
+        const SizedBox(height: 16),
+        TreeEquivalencyCard(totalEmissionKg: totalOverall),
         const SizedBox(height: 16),
         _buildSummaryCard(
           context, 
