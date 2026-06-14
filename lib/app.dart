@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'providers/auth_provider.dart';
-import 'providers/transport_provider.dart';
-import 'providers/electricity_provider.dart';
-import 'views/auth/login_view.dart';
-import 'views/dashboard/dashboard_view.dart';
+import 'features/auth/providers/auth_provider.dart';
+import 'features/transport/providers/transport_provider.dart';
+import 'features/electricity/providers/electricity_provider.dart';
+import 'features/auth/views/login_view.dart';
+import 'features/dashboard/views/dashboard_view.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
