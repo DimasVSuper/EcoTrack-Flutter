@@ -104,4 +104,51 @@ class TransportProvider with ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+  Future<bool> updateLog({
+    required int id,
+    required int transportTypeId,
+    required double distance,
+    required String activityDate,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.put(
+        '/transport-logs/$id',
+        data: {
+          'transport_type_id': transportTypeId,
+          'distance_km': distance,
+          'activity_date': activityDate,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        await fetchLogs();
+        return true;
+      }
+    } catch (_) {}
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> deleteLog(int id) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.delete('/transport-logs/$id');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        await fetchLogs();
+        return true;
+      }
+    } catch (_) {}
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
 }
