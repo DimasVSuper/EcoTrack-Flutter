@@ -19,10 +19,18 @@ class TransportLog {
     return TransportLog(
       id: json['id'],
       transportTypeId: json['transport_type_id'],
-      distanceKm: (json['distance_km'] ?? 0).toDouble(),
-      emissionKg: (json['emission_kg'] ?? 0).toDouble(),
+      distanceKm: _toDouble(json['distance_km']),
+      emissionKg: _toDouble(json['emission_kg']),
       activityDate: json['activity_date'],
       transportTypeName: json['transport_type'] != null ? json['transport_type']['name'] : 'Unknown',
     );
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }
