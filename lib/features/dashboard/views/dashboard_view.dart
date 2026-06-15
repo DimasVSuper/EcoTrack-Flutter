@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../transport/providers/transport_provider.dart';
+import '../../transport/models/transport_log.dart';
 import '../../electricity/providers/electricity_provider.dart';
+import '../../electricity/models/electricity_log.dart';
 import '../../transport/views/transport_input_view.dart';
 import '../../transport/views/transport_history_view.dart';
 import '../../electricity/views/electricity_input_view.dart';
@@ -86,7 +89,7 @@ class _DashboardViewState extends State<DashboardView> with WidgetsBindingObserv
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(flex: 2, child: _buildChartSection(context)),
+                        Expanded(flex: 2, child: _buildChartSection(context, transportProvider.logs, electricityProvider.logs)),
                         const SizedBox(width: 24),
                         Expanded(flex: 1, child: _buildSummarySection(context, transportProvider, electricityProvider)),
                       ],
@@ -96,7 +99,7 @@ class _DashboardViewState extends State<DashboardView> with WidgetsBindingObserv
                       children: [
                         _buildSummarySection(context, transportProvider, electricityProvider),
                         const SizedBox(height: 24),
-                        _buildChartSection(context),
+                        _buildChartSection(context, transportProvider.logs, electricityProvider.logs),
                       ],
                     ),
                 ],
@@ -228,7 +231,14 @@ class _DashboardViewState extends State<DashboardView> with WidgetsBindingObserv
     );
   }
 
-  Widget _buildChartSection(BuildContext context) {
+  Widget _buildChartSection(
+    BuildContext context,
+    List<TransportLog> transportLogs,
+    List<ElectricityLog> electricityLogs,
+  ) {
+    final chartPoints = _buildChartPoints(transportLogs, electricityLogs);
+    final chartDates = chartPoints.$2;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -250,61 +260,127 @@ class _DashboardViewState extends State<DashboardView> with WidgetsBindingObserv
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
           ),
           const SizedBox(height: 32),
-          SizedBox(
-            height: 300,
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: true),
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        const style = TextStyle(color: Color(0xFF64748B), fontSize: 12);
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(value.toInt().toString(), style: style),
-                        );
-                      },
+          if (chartPoints.$1.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: Text('Belum ada data untuk grafik.')),
+            )
+          else
+            SizedBox(
+              height: 300,
+              child: LineChart(
+                LineChartData(
+                  minX: 0,
+                  maxX: (chartPoints.$1.length - 1).toDouble(),
+                  minY: 0,
+                  gridData: const FlGridData(show: true),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index < 0 || index >= chartDates.length) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              chartDates[index],
+                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      getTitlesWidget: (value, meta) {
-                        return Text('${value.toInt()} kg', style: const TextStyle(color: Color(0xFF64748B), fontSize: 12));
-                      },
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 44,
+                        interval: _chartInterval(chartPoints.$1),
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '${value.toStringAsFixed(0)} kg',
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                          );
+                        },
+                      ),
                     ),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   ),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: chartPoints.$1,
+                      isCurved: true,
+                      color: const Color(0xFF10B981),
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: const Color(0xFF10B981).withOpacity(0.1),
+                      ),
+                    ),
+                  ],
                 ),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: const [
-                      FlSpot(0, 3), FlSpot(1, 5), FlSpot(2, 4),
-                      FlSpot(3, 7), FlSpot(4, 6), FlSpot(5, 10),
-                      FlSpot(6, 8),
-                    ],
-                    isCurved: true,
-                    color: const Color(0xFF10B981),
-                    barWidth: 3,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: const Color(0xFF10B981).withOpacity(0.1),
-                    ),
-                  ),
-                ],
               ),
             ),
-          ),
         ],
       ),
     );
+  }
+
+  (List<FlSpot>, List<String>) _buildChartPoints(
+    List<TransportLog> transportLogs,
+    List<ElectricityLog> electricityLogs,
+  ) {
+    final Map<String, double> totalsByDate = <String, double>{};
+
+    for (final log in transportLogs) {
+      totalsByDate.update(
+        log.activityDate,
+        (value) => value + log.emissionKg,
+        ifAbsent: () => log.emissionKg,
+      );
+    }
+
+    for (final log in electricityLogs) {
+      totalsByDate.update(
+        log.recordDate,
+        (value) => value + log.emissionKg,
+        ifAbsent: () => log.emissionKg,
+      );
+    }
+
+    final sortedDates = totalsByDate.keys.toList()..sort();
+    final spots = <FlSpot>[];
+
+    for (var i = 0; i < sortedDates.length; i++) {
+      spots.add(FlSpot(i.toDouble(), totalsByDate[sortedDates[i]] ?? 0));
+    }
+
+    final labels = sortedDates
+        .map((date) => DateFormat('dd/MM').format(DateTime.parse(date)))
+        .toList();
+
+    return (spots, labels);
+  }
+
+  double _chartInterval(List<FlSpot> spots) {
+    if (spots.isEmpty) {
+      return 1;
+    }
+
+    final maxValue = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    if (maxValue <= 5) {
+      return 1;
+    }
+
+    return (maxValue / 5).ceilToDouble();
   }
 }
