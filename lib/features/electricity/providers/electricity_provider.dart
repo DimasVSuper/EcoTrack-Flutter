@@ -69,4 +69,61 @@ class ElectricityProvider with ChangeNotifier {
     notifyListeners();
     return false;
   }
+
+  Future<bool> updateLog({
+    required int id,
+    required double usageKwh,
+    required String periodMonth,
+    required String recordDate,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.put(
+        '/electricity-logs/$id',
+        data: {
+          'usage_kwh': usageKwh,
+          'period_month': periodMonth,
+          'record_date': recordDate,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        await fetchLogs();
+        return true;
+      } else {
+        _error = 'Gagal mengubah (${response.statusCode})';
+      }
+    } catch (_) {
+      _error = 'Koneksi gagal. Pastikan server backend berjalan.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> deleteLog(int id) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiClient.dio.delete('/electricity-logs/$id');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        await fetchLogs();
+        return true;
+      } else {
+        _error = 'Gagal menghapus (${response.statusCode})';
+      }
+    } catch (_) {
+      _error = 'Koneksi gagal. Pastikan server backend berjalan.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
 }
