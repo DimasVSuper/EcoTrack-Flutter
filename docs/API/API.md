@@ -1,13 +1,14 @@
-# EcoTrack Backend API Documentation
+# EcoTrack Flutter API Integration Notes
 
 ## Overview
-EcoTrack Backend saat ini menyediakan API untuk:
-- autentikasi token berbasis Laravel Sanctum
-- profil pengguna
-- pencatatan dan riwayat transportasi
-- pencatatan dan riwayat penggunaan listrik
+Dokumen ini menjelaskan endpoint backend yang dipakai oleh aplikasi Flutter EcoTrack saat ini.
 
-> Catatan: Jalur publik untuk registrasi dan login belum terdaftar dalam `routes/api.php` saat ini. Hanya endpoint yang dilindungi `auth:sanctum` yang tersedia.
+Yang digunakan oleh frontend:
+- autentikasi token Sanctum (`/login`, `/register`, `/logout`)
+- profil pengguna (`/user/profile`)
+- transport logs (`/transport-logs` + CRUD)
+- electricity logs (`/electricity-logs` + CRUD)
+- transport type lookup (`/transport-types`)
 
 ## Base URL
 Gunakan base URL backend:
@@ -72,7 +73,23 @@ Backend juga mendaftarkan route `GET /sanctum/csrf-cookie` untuk kebutuhan Sanct
 }
 ```
 
-### 4. GET /api/transport-logs
+### 4. GET /api/transport-types
+- Deskripsi: Mengambil daftar jenis kendaraan untuk dropdown input transportasi.
+- Middleware: publik.
+- Response contoh:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Mobil Bensin",
+      "emission_factor_per_km": 0.192
+    }
+  ]
+}
+```
+
+### 5. GET /api/transport-logs
 - Deskripsi: Mengambil riwayat log transportasi user.
 - Middleware: `auth:sanctum`
 - Response contoh:
@@ -99,14 +116,14 @@ Backend juga mendaftarkan route `GET /sanctum/csrf-cookie` untuk kebutuhan Sanct
 }
 ```
 
-### 5. POST /api/transport-logs
+### 6. POST /api/transport-logs
 - Deskripsi: Menyimpan log transportasi baru dan menghitung emisi otomatis.
 - Middleware: `auth:sanctum`
 - Body:
 ```json
 {
   "transport_type_id": 1,
-  "distance": 12.5,
+  "distance_km": 12.5,
   "activity_date": "2026-06-11"
 }
 ```
@@ -130,7 +147,15 @@ Backend juga mendaftarkan route `GET /sanctum/csrf-cookie` untuk kebutuhan Sanct
 }
 ```
 
-### 6. GET /api/electricity-logs
+### 7. PUT/PATCH /api/transport-logs/{id}
+- Deskripsi: Mengubah log transportasi milik user yang sedang login.
+- Middleware: `auth:sanctum`
+
+### 8. DELETE /api/transport-logs/{id}
+- Deskripsi: Menghapus log transportasi milik user yang sedang login.
+- Middleware: `auth:sanctum`
+
+### 9. GET /api/electricity-logs
 - Deskripsi: Mengambil riwayat penggunaan listrik user.
 - Middleware: `auth:sanctum`
 - Response contoh:
@@ -152,15 +177,15 @@ Backend juga mendaftarkan route `GET /sanctum/csrf-cookie` untuk kebutuhan Sanct
 }
 ```
 
-### 7. POST /api/electricity-logs
+### 10. POST /api/electricity-logs
 - Deskripsi: Menyimpan log listrik baru dan menghitung emisi otomatis.
 - Middleware: `auth:sanctum`
 - Body:
 ```json
 {
-  "kwh": 150.00,
-  "period": "Juni 2026",
-  "logging_date": "2026-06-11"
+  "usage_kwh": 150.00,
+  "period_month": "2026-06",
+  "record_date": "2026-06-11"
 }
 ```
 - Response contoh:
@@ -180,9 +205,18 @@ Backend juga mendaftarkan route `GET /sanctum/csrf-cookie` untuk kebutuhan Sanct
 }
 ```
 
+### 11. PUT/PATCH /api/electricity-logs/{id}
+- Deskripsi: Mengubah log listrik milik user yang sedang login.
+- Middleware: `auth:sanctum`
+
+### 12. DELETE /api/electricity-logs/{id}
+- Deskripsi: Menghapus log listrik milik user yang sedang login.
+- Middleware: `auth:sanctum`
+
 ## Catatan Penting untuk Flutter
-- Backend tidak menyediakan route publik untuk `/api/register` dan `/api/login` saat ini.
-- Untuk menggunakan API saat ini, Anda perlu menambahkan endpoint login/register atau mengeluarkan token dari backend yang sudah ada.
+- Backend sudah menyediakan endpoint publik `/api/register` dan `/api/login`.
+- Token diambil dari response login/register lalu disimpan di `flutter_secure_storage` oleh `AuthProvider`.
+- Semua endpoint riwayat data dilindungi oleh `auth:sanctum`.
 - Semua endpoint data penggunanya dilindungi oleh `auth:sanctum`.
 - Pastikan request header mencakup `Authorization: Bearer <token>`.
 

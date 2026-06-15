@@ -8,19 +8,40 @@ This document outlines the architecture, database schema, networking configurati
 
 ```plaintext
 lib/
-├── data/
+├── app.dart
+├── main.dart
+├── core/
 │   └── api/
-│       └── api_client.dart       # Dio configuration with request token interceptor
-├── providers/
-│   └── auth_provider.dart        # Authentication state (Login, Register, Logout)
-├── views/
-│   ├── auth/
-│   │   ├── login_view.dart        # Responsive Login screen (Mobile / Web)
-│   │   └── register_view.dart     # Responsive Register screen (Mobile / Web)
-│   └── dashboard/
-│       └── dashboard_view.dart    # Dashboard placeholder & main activity view
-├── app.dart                       # Global MaterialApp theme & Auth router
-└── main.dart                      # App entry point (main function)
+│       └── api_client.dart
+└── features/
+    ├── auth/
+    │   ├── providers/
+    │   │   └── auth_provider.dart
+    │   └── views/
+    │       ├── login_view.dart
+    │       └── register_view.dart
+    ├── dashboard/
+    │   ├── views/
+    │   │   └── dashboard_view.dart
+    │   └── widgets/
+    │       └── tree_equivalency_card.dart
+    ├── electricity/
+    │   ├── models/
+    │   │   └── electricity_log.dart
+    │   ├── providers/
+    │   │   └── electricity_provider.dart
+    │   └── views/
+    │       ├── electricity_history_view.dart
+    │       └── electricity_input_view.dart
+    └── transport/
+        ├── models/
+        │   ├── transport_log.dart
+        │   └── transport_type.dart
+        ├── providers/
+        │   └── transport_provider.dart
+        └── views/
+            ├── transport_history_view.dart
+            └── transport_input_view.dart
 ```
 
 ---

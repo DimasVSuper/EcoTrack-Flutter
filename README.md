@@ -22,6 +22,7 @@ Aplikasi ini dikembangkan sebagai bagian frontend dari ekosistem EcoTrack yang m
 - Pencatatan log listrik
 - Dashboard awal dan alur UI MVP
 - Integrasi API dengan Dio + secure storage untuk session token
+- CRUD riwayat transportasi dan listrik dari UI (edit/hapus)
 
 ---
 
@@ -42,19 +43,38 @@ Aplikasi ini dikembangkan sebagai bagian frontend dari ekosistem EcoTrack yang m
 lib/
 ├── app.dart
 ├── main.dart
-├── data/
+├── core/
 │   └── api/
 │       └── api_client.dart
-├── providers/
-│   ├── auth_provider.dart
-│   ├── transport_provider.dart
-│   └── electricity_provider.dart
-└── views/
+└── features/
     ├── auth/
-    │   ├── login_view.dart
-    │   └── register_view.dart
-    └── dashboard/
-        └── dashboard_view.dart
+    │   ├── providers/
+    │   │   └── auth_provider.dart
+    │   └── views/
+    │       ├── login_view.dart
+    │       └── register_view.dart
+    ├── dashboard/
+    │   ├── views/
+    │   │   └── dashboard_view.dart
+    │   └── widgets/
+    │       └── tree_equivalency_card.dart
+    ├── electricity/
+    │   ├── models/
+    │   │   └── electricity_log.dart
+    │   ├── providers/
+    │   │   └── electricity_provider.dart
+    │   └── views/
+    │       ├── electricity_history_view.dart
+    │       └── electricity_input_view.dart
+    └── transport/
+        ├── models/
+        │   ├── transport_log.dart
+        │   └── transport_type.dart
+        ├── providers/
+        │   └── transport_provider.dart
+        └── views/
+            ├── transport_history_view.dart
+            └── transport_input_view.dart
 ```
 
 ---
