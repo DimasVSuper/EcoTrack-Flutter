@@ -13,7 +13,15 @@ class TransportType {
     return TransportType(
       id: json['id'],
       name: json['name'],
-      emissionFactorPerKm: (json['emission_factor_per_km'] ?? 0).toDouble(),
+      emissionFactorPerKm: _toDouble(json['emission_factor_per_km']),
     );
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }

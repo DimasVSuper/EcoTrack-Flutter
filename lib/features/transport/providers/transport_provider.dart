@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import '../../../core/api/api_client.dart';
 import '../models/transport_log.dart';
 import '../models/transport_type.dart';
@@ -40,8 +41,14 @@ class TransportProvider with ChangeNotifier {
       } else {
         _typesError = 'Gagal memuat kendaraan (${response.statusCode})';
       }
-    } catch (e) {
-      _typesError = 'Koneksi gagal. Pastikan server backend berjalan.';
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        _typesError = 'Sesi login habis. Silakan login ulang.';
+      } else {
+        _typesError = 'Koneksi gagal. Pastikan server backend berjalan.';
+      }
+    } catch (_) {
+      _typesError = 'Gagal memuat kendaraan.';
     } finally {
       _typesLoading = false;
       notifyListeners();

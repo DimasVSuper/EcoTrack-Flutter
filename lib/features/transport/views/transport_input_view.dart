@@ -15,13 +15,18 @@ class _TransportInputViewState extends State<TransportInputView> {
   TransportType? _selectedType;
   final TextEditingController _distanceController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
+  bool _didRequestTypes = false;
 
   @override
   void initState() {
     super.initState();
     _dateController.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    Future.microtask(() {
+      if (!mounted || _didRequestTypes) {
+        return;
+      }
+
+      _didRequestTypes = true;
       Provider.of<TransportProvider>(context, listen: false).fetchTypes();
     });
   }
@@ -65,13 +70,6 @@ class _TransportInputViewState extends State<TransportInputView> {
         padding: const EdgeInsets.all(24.0),
         child: Consumer<TransportProvider>(
           builder: (context, provider, _) {
-            if (provider.types.isEmpty && !provider.typesLoading && provider.typesError == null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                Provider.of<TransportProvider>(context, listen: false).fetchTypes();
-              });
-            }
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -94,6 +92,13 @@ class _TransportInputViewState extends State<TransportInputView> {
                         icon: const Icon(Icons.refresh),
                         label: const Text('Coba Lagi'),
                       ),
+                    ],
+                  )
+                else if (provider.types.isEmpty)
+                  const Column(
+                    children: [
+                      Text('Tidak ada data kendaraan.'),
+                      SizedBox(height: 8),
                     ],
                   )
                 else
