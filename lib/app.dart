@@ -5,7 +5,7 @@ import 'features/auth/providers/auth_provider.dart';
 import 'features/transport/providers/transport_provider.dart';
 import 'features/electricity/providers/electricity_provider.dart';
 import 'features/auth/views/login_view.dart';
-import 'features/dashboard/views/dashboard_view.dart';
+import 'features/main_view.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -32,9 +32,9 @@ class MyApp extends StatelessWidget {
         ),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF10B981), // Emerald green primary color
-            primary: const Color(0xFF10B981),
-            secondary: const Color(0xFF059669),
+            seedColor: const Color(0xFF2E7D32), // EcoTrack green primary color
+            primary: const Color(0xFF2E7D32),
+            secondary: const Color(0xFF1B5E20),
           ),
           useMaterial3: true,
           fontFamily: 'FiraSans', // As specified in UI_UX.md
@@ -59,7 +59,7 @@ class AuthCheck extends StatelessWidget {
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E7D32)),
               ),
             ),
           );
@@ -68,7 +68,7 @@ class AuthCheck extends StatelessWidget {
         return Consumer<AuthProvider>(
           builder: (context, auth, _) {
             return auth.token != null 
-                ? const DashboardView() 
+                ? const MainView() 
                 : const LoginView();
           },
         );
