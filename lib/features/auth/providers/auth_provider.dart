@@ -12,6 +12,12 @@ class AuthProvider with ChangeNotifier {
   String? _token;
   String? get token => _token;
 
+  String? _userName;
+  String? get userName => _userName;
+
+  String? _userEmail;
+  String? get userEmail => _userEmail;
+
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
@@ -25,6 +31,12 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data['data'];
         _token = data['access_token']?.toString();
+
+        final userData = data['user'];
+        if (userData != null) {
+          _userName = userData['name']?.toString();
+          _userEmail = userData['email']?.toString();
+        }
 
         if (_token != null && _token!.isNotEmpty) {
           await _storage.write(key: 'auth_token', value: _token);
@@ -59,6 +71,12 @@ class AuthProvider with ChangeNotifier {
         final data = response.data['data'];
         _token = data['access_token']?.toString();
 
+        final userData = data['user'];
+        if (userData != null) {
+          _userName = userData['name']?.toString();
+          _userEmail = userData['email']?.toString();
+        }
+
         if (_token != null && _token!.isNotEmpty) {
           await _storage.write(key: 'auth_token', value: _token);
         }
@@ -76,10 +94,27 @@ class AuthProvider with ChangeNotifier {
     return false;
   }
 
+  Future<void> fetchUserProfile() async {
+    try {
+      final response = await _apiClient.dio.get('/user/profile');
+      if (response.statusCode == 200) {
+        final userData = response.data['user'];
+        if (userData != null) {
+          _userName = userData['name']?.toString();
+          _userEmail = userData['email']?.toString();
+          notifyListeners();
+        }
+      }
+    } catch (_) {
+      // Gentle catch
+    }
+  }
+
   Future<bool> tryAutoLogin() async {
     final savedToken = await _storage.read(key: 'auth_token');
     if (savedToken != null && savedToken.isNotEmpty) {
       _token = savedToken;
+      fetchUserProfile();
       notifyListeners();
       return true;
     }
@@ -92,6 +127,8 @@ class AuthProvider with ChangeNotifier {
     } catch (_) {}
 
     _token = null;
+    _userName = null;
+    _userEmail = null;
     await _storage.delete(key: 'auth_token');
     notifyListeners();
   }
