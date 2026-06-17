@@ -140,6 +140,30 @@ Dokumen desain dan arsitektur proyek tersedia di folder `docs` dan direktori bra
 
 ---
 
+## 🚀 Deployment & Maintenance
+
+### Backend Laravel
+- Backend EcoTrack berjalan menggunakan Laravel 11.x dengan Sanctum untuk autentikasi.
+- Untuk deploy produksi, pastikan:
+  - `APP_ENV=production`
+  - `APP_DEBUG=false`
+  - SSL aktif
+  - database dan storage permission benar
+
+### Frontend Flutter
+- Aplikasi Flutter dapat dijalankan langsung dengan `flutter run` untuk development.
+- Untuk distribusi production:
+  - `flutter build apk --release`
+  - `flutter build appbundle --release`
+
+### Maintenance Rutin
+- Cek log API dan error dari backend.
+- Jalankan backup database secara berkala.
+- Update dependency backend/frontend saat ada patch keamanan.
+- Validasi ulang setelah setiap update dengan `php artisan test` dan `flutter analyze`.
+
+---
+
 ## Tujuan Proyek
 
 EcoTrack Flutter bertujuan menjadi antarmuka yang intuitif bagi pengguna untuk memantau jejak karbon pribadi, sekaligus menjadi fondasi pengembangan aplikasi yang lebih lengkap di masa mendatang. Pengguna dapat mengetahui secara nyata kontribusi jejak karbon harian mereka untuk mengambil aksi mitigasi perubahan iklim secara mandiri.
