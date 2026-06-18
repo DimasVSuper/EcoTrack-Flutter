@@ -14,6 +14,7 @@ lib/
 │   └── api/
 │       └── api_client.dart
 └── features/
+    ├── main_view.dart
     ├── auth/
     │   ├── providers/
     │   │   └── auth_provider.dart
@@ -21,27 +22,32 @@ lib/
     │       ├── login_view.dart
     │       └── register_view.dart
     ├── dashboard/
-    │   ├── views/
-    │   │   └── dashboard_view.dart
-    │   └── widgets/
-    │       └── tree_equivalency_card.dart
+    │   └── views/
+    │       └── dashboard_view.dart
     ├── electricity/
     │   ├── models/
     │   │   └── electricity_log.dart
     │   ├── providers/
     │   │   └── electricity_provider.dart
     │   └── views/
-    │       ├── electricity_history_view.dart
-    │       └── electricity_input_view.dart
-    └── transport/
-        ├── models/
-        │   ├── transport_log.dart
-        │   └── transport_type.dart
-        ├── providers/
-        │   └── transport_provider.dart
+    │       └── electricity_view.dart
+    ├── transport/
+    │   ├── models/
+    │   │   ├── transport_log.dart
+    │   │   └── transport_type.dart
+    │   ├── providers/
+    │   │   └── transport_provider.dart
+    │   └── views/
+    │       └── transport_view.dart
+    ├── analysis/
+    │   └── views/
+    │       └── analysis_view.dart
+    ├── recommendation/
+    │   └── views/
+    │       └── recommendation_view.dart
+    └── profile/
         └── views/
-            ├── transport_history_view.dart
-            └── transport_input_view.dart
+            └── profile_view.dart
 ```
 
 ---
